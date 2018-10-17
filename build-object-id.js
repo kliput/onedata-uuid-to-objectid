@@ -33,9 +33,8 @@ function crc16(arr) {
     0x4400, 0x84C1, 0x8581, 0x4540, 0x8701, 0x47C0, 0x4680, 0x8641,
     0x8201, 0x42C0, 0x4380, 0x8341, 0x4100, 0x81C1, 0x8081, 0x4040
   ];
-
   var crc = 0x0000;
-  for(var i = 0; i < arr.length; i++) {
+  for (var i = 0; i < arr.length; i++) {
     var byte = arr[i];
     crc = crc >>> 8 ^ table[ ( crc ^ byte ) & 0xff ];
   }
@@ -48,23 +47,22 @@ function getGuid(uuid, spaceId) {
 
 function buildObjectIdFromGuid(data) {
   var _length = data.length;
-  // old version was: 320
-  if (_length <= 44) {
-    var bin =
-      [0, 0, 0, 0, 0, _length, 0, 0];
-    for (var i = 0; i < 44; i++) {
-      bin.push(data.charCodeAt(i) || 0);
+  if (_length <= 320) {
+    var bin = [0, 0, 0, 0, 0, _length, 0, 0];
+    for (var i = 0; i < _length; i++) {
+        bin.push(data.charCodeAt(i) || 0);
     }
     var crc = crc16(bin);
     var bin2 = [0, 0, 0, 0, 0, _length, crc[0], crc[1]];
-    for (let i = 0; i < 44; i++) {
-      bin2.push(data.charCodeAt(i) || 0);
+    for (let i = 0; i < _length; i++) {
+        bin2.push(data.charCodeAt(i) || 0);
     }
-    return bin2.map(function(i) { return i.toString(16) }).join('');
+    return bin2.map(function(i) { return (i < 16 ? '0' : '') + i.toString(16) }).join('').toUpperCase();
   } else {
-    throw new Error("buildObjectId: data too large");
+      throw new Error('buildObjectId: data too large: ' + data);
   }
 };
+
 
 function buildObjectId(uuid, spaceId) {
   return buildObjectIdFromGuid(getGuid(uuid, spaceId));
